@@ -1,0 +1,491 @@
+id: https://w3id.org/monarch-initiative/monarch-animal-models
+name: monarch_animal_models
+title: Monarch Animal Models catalog
+description: >-
+  Destination model for the Monarch Animal Models catalog. It normalizes
+  whole-organism disease models from two curated sources -- DisMech
+  `animal_models` entries and Alliance member (MGI, ZFIN, RGD) genotype
+  `model_of` disease associations carried by the Monarch KG -- into one record
+  shape, and records how records from the two sources correspond.
+
+  The record shape extends NAMO `AnimalModel` (species, strain, life stage,
+  environment) with the genetic composition of the model. The human disease
+  gene, the model organism gene, and the correspondence between them are kept
+  separate, because the relationship is not always one-to-one orthology
+  (co-orthologs, human transgenes, syntenic-region models, and models with no
+  gene at all).
+
+  Every derived value carries an explicit basis. Curated assertions from a
+  source are never merged with values computed by this pipeline.
+license: BSD-3-Clause
+version: 0.1.0
+prefixes:
+  linkml: https://w3id.org/linkml/
+  mam: https://w3id.org/monarch-initiative/monarch-animal-models/
+  namo: https://w3id.org/namo/
+  biolink: https://w3id.org/biolink/vocab/
+  infores: https://w3id.org/biolink/infores/
+  NCBITaxon: http://purl.obolibrary.org/obo/NCBITaxon_
+  MONDO: http://purl.obolibrary.org/obo/MONDO_
+  HGNC: http://identifiers.org/hgnc/
+  MGI: http://identifiers.org/MGI/
+  ZFIN: http://identifiers.org/zfin/
+  RGD: http://identifiers.org/rgd/
+  PMID: http://identifiers.org/pubmed/
+default_prefix: mam
+default_range: string
+imports:
+  - linkml:types
+
+classes:
+  Catalog:
+    tree_root: true
+    description: The generated catalog emitted as dist/data/catalog.json.
+    attributes:
+      schema_version:
+        range: integer
+        required: true
+      generated_at:
+        range: datetime
+        required: true
+      provenance:
+        range: BuildProvenance
+        inlined: true
+        required: true
+      models:
+        range: AnimalModel
+        multivalued: true
+        inlined_as_list: true
+      diseases:
+        range: DiseaseCoverage
+        multivalued: true
+        inlined_as_list: true
+      counterparts:
+        range: ModelCounterpart
+        multivalued: true
+        inlined_as_list: true
+
+  AnimalModel:
+    description: >-
+      One whole-organism disease model from one source. A DisMech record is one
+      `animal_models` entry; a KG record is one genotype (MGI genotype, ZFIN
+      fish, RGD strain) with all of its `model_of` disease associations.
+    exact_mappings:
+      - namo:AnimalModel
+    attributes:
+      id:
+        identifier: true
+        description: >-
+          Stable record id. DisMech records use the source path and model name;
+          KG records use the genotype CURIE.
+      name:
+        required: true
+        description: Display label. DisMech `name`, or genotype plus species when absent.
+      name_basis:
+        range: ValueBasis
+        description: CURATED when the source named the model; DERIVED for a genotype/species label.
+      description: {}
+      source:
+        range: ModelSource
+        required: true
+      namo_type:
+        description: The NAMO class this record instantiates (namo:AnimalModel).
+      context_id:
+        description: DisMech disorder or module the record comes from (DisMech records only).
+      context_kind:
+        description: Disorder or Module.
+      context_name: {}
+      species:
+        range: Taxon
+        inlined: true
+        description: Normalized species. Absent when the source value has no safe mapping.
+      species_as_curated:
+        description: The species string exactly as the source recorded it.
+      species_basis:
+        range: ValueBasis
+        required: true
+      strain_background:
+        description: Genetic background or strain, as recorded by the source.
+      model_category:
+        range: ModelCategory
+        description: Normalized category. Absent when the source value has no safe mapping.
+      model_category_as_curated: {}
+      model_category_basis:
+        range: ValueBasis
+      genotype:
+        range: Genotype
+        inlined: true
+      genetic_components:
+        range: GeneticComponent
+        multivalued: true
+        inlined_as_list: true
+      disease_associations:
+        range: DiseaseAssociation
+        multivalued: true
+        inlined_as_list: true
+      modeled_mechanisms:
+        range: ModeledMechanism
+        multivalued: true
+        inlined_as_list: true
+        description: DisMech pathograph links. Never populated for KG records.
+      associated_phenotypes:
+        range: Term
+        multivalued: true
+        inlined_as_list: true
+        description: Phenotypes the source records for the model (DisMech `associated_phenotypes`).
+      publications:
+        multivalued: true
+        description: Publication CURIEs cited by the record.
+      evidence:
+        range: EvidenceItem
+        multivalued: true
+        inlined_as_list: true
+      notes: {}
+      source_record_url:
+        range: uri
+        description: The record's page in its source (DisMech disorder page, Monarch genotype page).
+      source_yaml_url:
+        range: uri
+        description: Permalink to the DisMech YAML at the snapshot revision (DisMech records only).
+
+  Genotype:
+    attributes:
+      id:
+        description: Genotype CURIE when the source has one (MGI, ZFIN, RGD).
+      label:
+        description: Genotype as written by the source, e.g. free text in DisMech.
+
+  GeneticComponent:
+    description: >-
+      One gene-level component of a model: the gene altered in the model
+      organism, its alleles, the human gene it stands in for, and how the two
+      correspond. Every part is optional; induced, xenograft, and infection
+      models have no component at all.
+    attributes:
+      model_gene:
+        range: Gene
+        inlined: true
+      model_gene_basis:
+        range: ValueBasis
+      alleles:
+        range: Allele
+        multivalued: true
+        inlined_as_list: true
+      reagents:
+        range: Reagent
+        multivalued: true
+        inlined_as_list: true
+        description: Sequence-targeting reagents (morpholinos, CRISPRs, TALENs) affecting the model gene.
+      source:
+        description: >-
+          Where the gene-level link came from: DisMech, the Monarch KG, or ZFIN fish
+          components (for reagent-targeted genes and allele-gene links the KG lacks).
+      human_gene:
+        range: Gene
+        inlined: true
+      human_gene_basis:
+        range: ValueBasis
+      correspondence:
+        range: GeneCorrespondence
+        inlined: true
+
+  Gene:
+    attributes:
+      id: {}
+      symbol: {}
+      taxon:
+        range: Taxon
+        inlined: true
+
+  Allele:
+    attributes:
+      id: {}
+      label: {}
+
+  Reagent:
+    description: A sequence-targeting reagent, identified by its ZFIN id.
+    attributes:
+      id: {}
+      label: {}
+      reagent_type:
+        range: ReagentType
+
+  GeneCorrespondence:
+    description: How a model organism gene stands in for a human disease gene.
+    attributes:
+      relation:
+        range: CorrespondenceRelation
+        required: true
+      basis:
+        range: ValueBasis
+        required: true
+      support:
+        range: OrthologySupport
+        multivalued: true
+        inlined_as_list: true
+      note: {}
+
+  OrthologySupport:
+    description: >-
+      One source's support for an orthology correspondence. The method-count
+      fields are reserved for richer orthology sources (for example Alliance
+      combined orthology) and are empty when the source only provides a family.
+    attributes:
+      source:
+        description: Information resource CURIE, e.g. infores:panther.
+        required: true
+      evidence:
+        multivalued: true
+        description: Supporting identifiers, e.g. PANTHER.FAMILY CURIEs.
+      methods:
+        multivalued: true
+      methods_matched:
+        range: integer
+      methods_total:
+        range: integer
+      best_score:
+        range: boolean
+      best_reverse_score:
+        range: boolean
+
+  DiseaseAssociation:
+    description: One model-to-disease assertion made by a source.
+    attributes:
+      disease:
+        range: Term
+        inlined: true
+        required: true
+      original_disease:
+        range: Term
+        inlined: true
+        description: The disease as originally asserted before ID mapping (e.g. a DOID for MGI).
+      source:
+        required: true
+        description: Information resource CURIE that made the assertion.
+      publications:
+        multivalued: true
+      evidence_codes:
+        multivalued: true
+      dismech_precision:
+        range: PrecisionRelation
+        description: Where the disease sits relative to DisMech entries.
+      dismech_entries:
+        multivalued: true
+        description: >-
+          DisMech context ids for the exact entry, or for the nearest ancestor
+          entries when the disease is more specific than any DisMech entry.
+
+  ModeledMechanism:
+    description: A DisMech `modeled_mechanisms` link, normalized for browsing.
+    attributes:
+      target:
+        required: true
+      relationship:
+        required: true
+      fidelity: {}
+      model_scale: {}
+      description: {}
+      limitations: {}
+      evidence_count:
+        range: integer
+
+  ModelCounterpart:
+    description: >-
+      A candidate correspondence between a DisMech record and a KG record. It
+      is never an identity assertion; `bases` lists every rule that matched.
+    attributes:
+      id:
+        identifier: true
+      dismech_model_id:
+        required: true
+      kg_model_id:
+        required: true
+      bases:
+        range: MatchBasis
+        multivalued: true
+        required: true
+      shared_publications:
+        multivalued: true
+      disease_relation:
+        range: DiseaseRelation
+        required: true
+      species_agreement:
+        range: boolean
+
+  DiseaseCoverage:
+    description: >-
+      One disease row for the coverage view: a DisMech disorder entry, or a KG
+      `model_of` disease with no exact DisMech entry. Counts curated links only;
+      nothing is scored or ranked.
+    attributes:
+      id:
+        identifier: true
+      name:
+        required: true
+      disease:
+        range: Term
+        inlined: true
+      dismech_entry:
+        description: DisMech context id when the disease has its own entry.
+      dismech_model_ids:
+        multivalued: true
+      kg_exact_model_ids:
+        multivalued: true
+      kg_subtype_model_ids:
+        multivalued: true
+        description: KG models of diseases that are subclasses of this disease.
+      kg_close_parent_model_ids:
+        multivalued: true
+        description: >-
+          KG models of ancestor diseases that are specific enough to count (at
+          most CLOSE_PARENT_MAX_DESCENDANTS MONDO descendants).
+      coverage:
+        range: CoverageCategory
+        required: true
+
+  EvidenceItem:
+    description: A DisMech evidence item, normalized.
+    attributes:
+      reference: {}
+      reference_title: {}
+      supports: {}
+      evidence_source: {}
+      snippet: {}
+      explanation: {}
+
+  Taxon:
+    attributes:
+      id: {}
+      label: {}
+
+  Term:
+    attributes:
+      id: {}
+      label: {}
+
+  BuildProvenance:
+    description: Revisions, releases, and checksums of every build input.
+    attributes:
+      dismech:
+        range: SourceRevision
+        inlined: true
+      kg:
+        range: SourceRevision
+        inlined: true
+      namo:
+        range: SourceRevision
+        inlined: true
+      warnings:
+        multivalued: true
+
+  SourceRevision:
+    attributes:
+      repository: {}
+      revision: {}
+      version: {}
+      dirty:
+        range: boolean
+      location: {}
+
+enums:
+  ModelSource:
+    permissible_values:
+      DISMECH:
+        meaning: infores:dismech
+      MGI:
+        meaning: infores:mgi
+      ZFIN:
+        meaning: infores:zfin
+      RGD:
+        meaning: infores:rgd
+
+  ValueBasis:
+    description: Where a value came from.
+    permissible_values:
+      CURATED:
+        description: Stated by the source record.
+      SAFE_MAPPING:
+        description: Mapped from a curated free-text value by a documented exact-match table.
+      DERIVED:
+        description: Computed by this pipeline from another source (e.g. KG orthology).
+      NOT_REPORTED:
+        description: The source did not record a value.
+      NOT_NORMALIZED:
+        description: The source recorded a value that no documented rule maps.
+
+  ModelCategory:
+    permissible_values:
+      KNOCKOUT: {}
+      CONDITIONAL_KNOCKOUT: {}
+      KNOCK_IN: {}
+      TRANSGENIC: {}
+      KNOCKDOWN: {}
+      CHEMICAL_MUTAGENESIS: {}
+      SPONTANEOUS: {}
+      GENETIC_UNSPECIFIED: {}
+      INDUCED: {}
+      INFECTION: {}
+      XENOGRAFT: {}
+      SURGICAL: {}
+
+  ReagentType:
+    permissible_values:
+      MORPHOLINO: {}
+      CRISPR: {}
+      TALEN: {}
+
+  CorrespondenceRelation:
+    permissible_values:
+      SAME_GENE:
+        description: The model gene is the human gene itself (e.g. a human transgene).
+      ORTHOLOGOUS:
+        description: The model gene is an ortholog of the human gene.
+      SYNTENIC_REGION:
+        description: The model alters a region syntenic to a human region.
+      FUNCTIONAL_ANALOG:
+        description: Correspondence asserted on functional, not evolutionary, grounds.
+
+  PrecisionRelation:
+    permissible_values:
+      EXACT:
+        description: The disease has its own DisMech entry.
+      MORE_SPECIFIC:
+        description: The disease is a subclass of one or more DisMech entries.
+      NO_DISMECH_ENTRY:
+        description: Neither the disease nor any ancestor has a DisMech entry.
+
+  DiseaseRelation:
+    description: How the diseases of two counterpart records relate in MONDO.
+    permissible_values:
+      SAME:
+        description: Both records associate the same MONDO disease.
+      KG_MORE_SPECIFIC: {}
+      KG_MORE_GENERAL: {}
+      UNRELATED:
+        description: No subclass path between the two diseases.
+      NOT_COMPARABLE:
+        description: The DisMech record has no MONDO disease (e.g. a module-level model).
+
+  MatchBasis:
+    permissible_values:
+      SAME_PUBLICATION: {}
+      SAME_DISEASE: {}
+      RELATED_DISEASE:
+        description: The diseases are linked by a MONDO subclass path.
+      SAME_SPECIES: {}
+      SAME_HUMAN_GENE:
+        description: The DisMech human gene equals a KG-derived human ortholog of the model gene.
+
+  CoverageCategory:
+    permissible_values:
+      BOTH:
+        description: DisMech and the KG both have models of this exact disease.
+      DISMECH_ONLY: {}
+      KG_ONLY: {}
+      KG_SUBTYPE_ONLY:
+        description: No exact models; the KG has models of a subtype.
+      KG_CLOSE_PARENT_ONLY:
+        description: No exact models; the KG has models of a close parent.
+      DISMECH_AND_KG_OTHER_PRECISION:
+        description: DisMech has models; the KG has models only at another precision.
+      NONE: {}

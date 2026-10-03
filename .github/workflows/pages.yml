@@ -1,0 +1,119 @@
+name: Build and deploy Monarch Animal Models
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+  schedule:
+    # Rebuild from upstream sources even when this repository has not changed.
+    - cron: "37 09 * * *"
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: >-
+    ${{ github.workflow }}-${{ github.event_name == 'pull_request' && github.ref || 'pages' }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Check out browser
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Check out DisMech source
+        uses: actions/checkout@v4
+        with:
+          repository: monarch-initiative/dismech
+          path: .sources/dismech
+          persist-credentials: false
+          sparse-checkout: |
+            kb/disorders
+            kb/modules
+            src/dismech/schema/dismech.yaml
+          sparse-checkout-cone-mode: false
+
+      - name: Check out NAMO schema
+        uses: actions/checkout@v4
+        with:
+          repository: monarch-initiative/namo
+          path: .sources/namo
+          persist-credentials: false
+          sparse-checkout: src/namo/schema/namo.yaml
+          sparse-checkout-cone-mode: false
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: pyproject.toml
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Install the extraction dependencies
+        run: python -m pip install 'PyYAML>=6,<7' 'duckdb>=1.1,<2'
+
+      - name: Copy upstream YAML into the disposable source snapshot
+        run: >-
+          env PYTHONPATH=src python -m animal_models_browser.cli sync
+          --dismech-root .sources/dismech
+          --output .cache/dismech
+
+      - name: Extract the KG slice from the latest Monarch KG release
+        run: env PYTHONPATH=src python -m animal_models_browser.cli kg-slice --output .cache/kg
+
+      - name: Download ZFIN fish components
+        run: env PYTHONPATH=src python -m animal_models_browser.cli zfin-sync --output .cache/zfin
+
+      - name: Build static site
+        run: >-
+          env PYTHONPATH=src python -m animal_models_browser.cli build
+          --dismech .cache/dismech
+          --kg .cache/kg
+          --zfin .cache/zfin
+          --namo-schema .sources/namo/src/namo/schema/namo.yaml
+          --output dist
+
+      - name: Validate generated catalog and static assets
+        run: env PYTHONPATH=src python -m animal_models_browser.cli validate --site dist
+
+      - name: Run Python pipeline contracts
+        run: env PYTHONPATH=src python -m unittest discover -s tests -p 'test_*.py' -v
+
+      - name: Run browser-core contracts
+        run: node --test tests/*.test.mjs
+
+      - name: Configure GitHub Pages
+        if: github.event_name != 'pull_request'
+        uses: actions/configure-pages@v5
+
+      - name: Upload generated site
+        if: github.event_name != 'pull_request'
+        uses: actions/upload-pages-artifact@v4
+        with:
+          path: dist
+
+  deploy:
+    if: github.event_name != 'pull_request'
+    needs: build
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

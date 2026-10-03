@@ -1,0 +1,149 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="color-scheme" content="light">
+    <meta name="theme-color" content="#00838f">
+    <meta name="referrer" content="strict-origin-when-cross-origin">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; connect-src 'none'; object-src 'none'; base-uri 'self'; form-action 'none'">
+    <meta name="description" content="A read-only, faceted browser for whole-organism disease models curated in DisMech and asserted by Alliance members in the Monarch KG.">
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="Animal model browser">
+    <meta property="og:description" content="Explore whole-organism models of human disease: species, genes, alleles, and the mechanisms they recapitulate.">
+    <meta property="og:url" content="https://monarch-initiative.github.io/monarch-animal-models/">
+    <link rel="icon" href="./assets/favicon.png">
+    <link rel="canonical" href="https://monarch-initiative.github.io/monarch-animal-models/">
+    <link rel="stylesheet" href="./assets/styles.css">
+    <title>Animal model browser · Monarch Initiative</title>
+  </head>
+  <body>
+    <a class="skip-link" href="#results">Skip to results</a>
+    <header class="site-header">
+      <div class="topbar shell">
+        <a class="brand" href="https://monarchinitiative.org/">
+          <span class="brand-mark" aria-hidden="true">M</span>
+          <span>Monarch Initiative</span>
+        </a>
+        <nav aria-label="Related resources">
+          <a href="https://dismech.monarchinitiative.org/">DisMech</a>
+          <a href="https://monarch-initiative.github.io/monarch-nams/">NAM browser</a>
+          <a href="https://monarch-initiative.github.io/namo/">NAMO</a>
+          <a href="https://github.com/monarch-initiative/monarch-animal-models">GitHub</a>
+        </nav>
+      </div>
+      <div class="hero shell">
+        <div class="hero-copy">
+          <p class="eyebrow">Models for mechanistic discovery</p>
+          <h1>Animal model browser</h1>
+          <p class="hero-lede">Explore whole-organism models of human disease: their species, genes, and alleles, and the disease mechanisms they recapitulate.</p>
+          <p class="read-only-note"><span aria-hidden="true">◇</span> Read-only view of curated source records</p>
+        </div>
+        <dl class="hero-stats" aria-label="Catalog summary">
+          <div><dt id="model-stat">—</dt><dd>Animal models</dd></div>
+          <div><dt id="species-stat">—</dt><dd>Species</dd></div>
+          <div><dt id="disease-stat">—</dt><dd>Diseases</dd></div>
+        </dl>
+      </div>
+    </header>
+    <main>
+      <section class="explorer shell" aria-labelledby="explorer-heading">
+        <h2 class="visually-hidden" id="explorer-heading">Catalog explorer</h2>
+        <div class="search-panel">
+          <label for="catalog-search" id="search-label">Search animal models</label>
+          <div class="search-input-wrap">
+            <span class="search-icon" aria-hidden="true"></span>
+            <input id="catalog-search" type="search" autocomplete="off" spellcheck="false" placeholder="Search models, diseases, genes…">
+            <button class="clear-search" id="clear-search" type="button" aria-label="Clear search" hidden>Clear</button>
+          </div>
+          <p id="view-description" class="view-description"></p>
+        </div>
+        <div class="mobile-filter-bar">
+          <button class="filter-toggle" id="filter-toggle" type="button" aria-expanded="false" aria-controls="filters-panel">
+            Filters <span id="mobile-filter-count"></span>
+          </button>
+        </div>
+        <div class="catalog-layout" id="catalog-panel">
+          <div class="filter-backdrop" id="filter-backdrop" hidden></div>
+          <aside class="filters" id="filters-panel" aria-labelledby="filters-heading">
+            <div class="filters-heading-row">
+              <h3 id="filters-heading">Refine results</h3>
+              <button id="close-filters" class="mobile-only close-filters" type="button">Close</button>
+            </div>
+            <button class="clear-all" id="clear-all" type="button" disabled>Clear all filters</button>
+            <div id="facet-list"></div>
+          </aside>
+          <section class="results-column" id="results" tabindex="-1" aria-labelledby="results-heading">
+            <div id="active-filters" class="active-filters" aria-label="Active filters"></div>
+            <div class="results-toolbar">
+              <div>
+                <h3 id="results-heading">Animal models</h3>
+                <p id="result-count" aria-live="polite">Loading catalog…</p>
+              </div>
+              <label class="sort-control" for="sort-select">Sort by
+                <select id="sort-select"></select>
+              </label>
+            </div>
+            <div id="result-list" class="result-list" aria-busy="true"></div>
+            <div class="empty-state" id="empty-state" hidden>
+              <div class="empty-symbol" aria-hidden="true">◇</div>
+              <h4>No matching records</h4>
+              <p>Try a broader search or remove one or more filters.</p>
+              <button type="button" id="empty-clear">Clear search and filters</button>
+            </div>
+            <button type="button" class="load-more" id="load-more" hidden>Show more results</button>
+          </section>
+        </div>
+      </section>
+
+      <section class="method-strip">
+        <div class="shell method-grid">
+          <div>
+            <p class="eyebrow">Transparent by design</p>
+            <h2>Two sources, kept apart</h2>
+          </div>
+          <p>DisMech curation and Alliance member assertions are normalized into one record shape but never merged. Species and categories map only through documented exact-match tables; disease precision comes from MONDO subclass axioms; orthology comes from the KG and is labeled as derived. Missing values stay visible.</p>
+          <div class="method-links">
+            <a href="./data/catalog.json" download>Download catalog JSON</a>
+            <a href="https://github.com/monarch-initiative/monarch-animal-models">View pipeline</a>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <div class="shell footer-grid">
+        <div>
+          <p class="footer-brand">Animal model browser</p>
+          <p>A Monarch Initiative resource for comparing curated animal models of disease.</p>
+        </div>
+        <div>
+          <p class="footer-heading">Sources</p>
+          <a href="https://dismech.monarchinitiative.org/">DisMech</a>
+          <a href="https://monarchinitiative.org/">Monarch KG</a>
+          <a href="https://zfin.org/">ZFIN</a>
+          <a href="https://monarch-initiative.github.io/namo/">NAMO</a>
+        </div>
+        <div>
+          <p class="footer-heading">Snapshot</p>
+          <p id="snapshot-summary">Loading provenance…</p>
+        </div>
+      </div>
+      <div class="shell disclaimer"><a href="https://dismech.monarchinitiative.org/elements/disclaimer/">DisMech is an AI-curated research resource and is not medical advice.</a> Do not use this catalog for diagnosis or treatment decisions.</div>
+    </footer>
+
+    <dialog id="record-dialog" aria-labelledby="dialog-title">
+      <div class="dialog-bar">
+        <p id="dialog-kicker"></p>
+        <button id="dialog-close" type="button" aria-label="Close record details">Close</button>
+      </div>
+      <div id="dialog-content" class="dialog-content"></div>
+    </dialog>
+
+    <noscript>
+      <div class="noscript">This interactive catalog needs JavaScript. The generated data remains available as <a href="./data/catalog.json">JSON</a>.</div>
+    </noscript>
+    <script src="./data/index.js"></script>
+    <script type="module" src="./assets/app.js"></script>
+  </body>
+</html>

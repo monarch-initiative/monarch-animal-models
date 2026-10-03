@@ -1,0 +1,6 @@
+id: https://w3id.org/monarch-initiative/dismech
+name: dismech
+prefixes:
+  MONDO: http://purl.obolibrary.org/obo/MONDO_
+  hgnc: "https://www.genenames.org/data/gene-symbol-report/#!/hgnc_id/HGNC:"
+  PMID: https://pubmed.ncbi.nlm.nih.gov/

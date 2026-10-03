@@ -1,0 +1,11 @@
+id: https://w3id.org/namo
+name: namo
+prefixes:
+  namo: https://w3id.org/namo/
+classes:
+  ModelSystem: {}
+  AnimalModel:
+    is_a: ModelSystem
+    attributes:
+      species: {}
+      strain: {}

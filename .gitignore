@@ -1,0 +1,21 @@
+# Generated source snapshots and site output
+/.cache/
+/.sources/
+/dist/
+/tmp/
+
+# Python
+/.venv/
+__pycache__/
+*.py[cod]
+/.pytest_cache/
+/.ruff_cache/
+
+# JavaScript tooling (the app itself has no runtime dependencies)
+/node_modules/
+npm-debug.log*
+
+# Local configuration and editor files
+.DS_Store
+.env*
+*.swp

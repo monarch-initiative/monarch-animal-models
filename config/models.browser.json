@@ -1,0 +1,218 @@
+{
+  "title": "Animal models",
+  "description": "Whole-organism models of human disease from DisMech and from MGI, ZFIN, and RGD via the Monarch KG. Related models share a publication, or the same species, human gene, and a closely related disease.",
+  "searchPlaceholder": "Search models, genotypes, diseases, genes, alleles, mechanisms, or phenotypes",
+  "searchableFields": [
+    "name",
+    "description",
+    "disease_labels",
+    "species_label",
+    "species_as_curated",
+    "model_category_as_curated",
+    "strain_background",
+    "human_gene_symbols",
+    "model_gene_symbols",
+    "allele_labels",
+    "reagent_labels",
+    "mechanism_names",
+    "phenotype_labels",
+    "publications"
+  ],
+  "facets": [
+    {
+      "field": "species_label",
+      "label": "Species",
+      "type": "string",
+      "sortBy": "count",
+      "missingLabel": "Not reported / not normalized"
+    },
+    {
+      "field": "species_basis_label",
+      "label": "Species basis",
+      "type": "string",
+      "sortBy": "count"
+    },
+    {
+      "field": "model_category_label",
+      "label": "Model category",
+      "type": "string",
+      "sortBy": "count",
+      "missingLabel": "Not reported / not normalized"
+    },
+    {
+      "field": "disease_area_labels",
+      "label": "Disease area",
+      "type": "array",
+      "sortBy": "count",
+      "operator": "or",
+      "missingLabel": "Not reported"
+    },
+    {
+      "field": "disease_labels",
+      "label": "Disease",
+      "type": "array",
+      "sortBy": "alphabetical",
+      "operator": "or",
+      "missingLabel": "Not reported",
+      "groupField": "disease_group_ids"
+    },
+    {
+      "field": "counterpart_status",
+      "label": "Related models",
+      "type": "string",
+      "sortBy": "count"
+    },
+    {
+      "field": "counterpart_basis_labels",
+      "label": "Related by",
+      "type": "array",
+      "sortBy": "count",
+      "operator": "or",
+      "missingLabel": "No related models"
+    },
+    {
+      "field": "perturbation_labels",
+      "label": "Perturbation",
+      "type": "array",
+      "sortBy": "count",
+      "operator": "or",
+      "missingLabel": "Not reported"
+    },
+    {
+      "field": "human_gene_symbols",
+      "label": "Human gene",
+      "type": "array",
+      "sortBy": "count",
+      "operator": "or",
+      "missingLabel": "Not reported"
+    },
+    {
+      "field": "model_gene_symbols",
+      "label": "Model organism gene",
+      "type": "array",
+      "sortBy": "count",
+      "operator": "or",
+      "missingLabel": "Not reported"
+    },
+    {
+      "field": "gene_basis_labels",
+      "label": "Gene basis",
+      "type": "array",
+      "sortBy": "count",
+      "operator": "or",
+      "missingLabel": "No genes"
+    },
+    {
+      "field": "mechanism_status",
+      "label": "Pathograph links",
+      "type": "string",
+      "sortBy": "count"
+    },
+    {
+      "field": "relationships",
+      "label": "Model relationship",
+      "type": "array",
+      "sortBy": "count",
+      "operator": "or",
+      "missingLabel": "Not reported"
+    },
+    {
+      "field": "fidelities",
+      "label": "Explicit fidelity",
+      "type": "array",
+      "sortBy": "count",
+      "operator": "or",
+      "missingLabel": "Not reported"
+    },
+    {
+      "field": "mechanism_names",
+      "label": "Modeled mechanism",
+      "type": "array",
+      "sortBy": "count",
+      "operator": "or",
+      "missingLabel": "Not reported"
+    },
+    {
+      "field": "publication_status",
+      "label": "Publication",
+      "type": "string",
+      "sortBy": "count"
+    },
+    {
+      "field": "source_label",
+      "label": "Source",
+      "type": "string",
+      "sortBy": "count"
+    },
+    {
+      "field": "related_ids",
+      "label": "Related to",
+      "type": "array",
+      "operator": "or",
+      "hidden": true
+    },
+    {
+      "field": "disease_group_ids",
+      "label": "Disease (incl. subtypes)",
+      "type": "array",
+      "operator": "or",
+      "hidden": true
+    }
+  ],
+  "displayFields": [
+    {
+      "field": "name",
+      "label": "Model",
+      "type": "string"
+    },
+    {
+      "field": "source_label",
+      "label": "Source",
+      "type": "string"
+    },
+    {
+      "field": "species_label",
+      "label": "Species",
+      "type": "string"
+    },
+    {
+      "field": "disease_labels",
+      "label": "Disease",
+      "type": "array"
+    },
+    {
+      "field": "human_gene_symbols",
+      "label": "Human gene",
+      "type": "array"
+    },
+    {
+      "field": "model_gene_symbols",
+      "label": "Model gene",
+      "type": "array"
+    },
+    {
+      "field": "relationships",
+      "label": "Relationships",
+      "type": "array"
+    },
+    {
+      "field": "source_record_url",
+      "label": "Source record",
+      "type": "url"
+    }
+  ],
+  "sortOptions": [
+    {
+      "value": "name",
+      "label": "Model name"
+    },
+    {
+      "value": "disease",
+      "label": "Disease"
+    },
+    {
+      "value": "counterparts",
+      "label": "Most related models"
+    }
+  ]
+}

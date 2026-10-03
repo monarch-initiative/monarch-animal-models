@@ -1,0 +1,36 @@
+name: Disease A
+disease_term:
+  preferred_term: disease A
+  term:
+    id: MONDO:0000002
+    label: disease A
+pathophysiology:
+  - name: Event A
+    description: Upstream event.
+    downstream:
+      - target: Event B
+        causal_link_type: DIRECT
+  - name: Event B
+    description: Downstream event.
+animal_models:
+  - name: Gene1 knockout mouse
+    species: Mouse
+    genotype: Gene1-/-
+    category: Knockout
+    genes:
+      - preferred_term: GENE1
+        term:
+          id: hgnc:1
+          label: GENE1
+    publication: PMID:1
+    modeled_mechanisms:
+      - target: Event A
+        relationship: RECAPITULATES
+        fidelity: HIGH
+        evidence:
+          - reference: PMID:1
+            supports: SUPPORT
+            evidence_source: MODEL_ORGANISM
+            snippet: Gene1 knockout mice show event A.
+  - species: Mouse and rat
+    genotype: Spontaneous mutant

@@ -1,0 +1,6 @@
+name: Disease_B
+disease_term:
+  preferred_term: disease B
+  term:
+    id: MONDO:0000004
+    label: disease B
