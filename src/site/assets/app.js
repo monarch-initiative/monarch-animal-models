@@ -286,23 +286,29 @@ function facetFinder(definition, entries, groups = null) {
     matches.replaceChildren();
     const tokens = normalizeText(input.value).split(/\s+/).filter(Boolean);
     if (!tokens.length) return;
-    const groupHits = groupMatches(tokens, groups, entries);
-    groupHits.forEach(([id, count], index) =>
-      matches.append(facetOption(groups.definition, id, count, `group-${index}`, groupText(id))),
-    );
     // Match each typed word against the start of a word in the value, so "rett"
     // finds "Rett syndrome" but not "Barrett esophagus".
     const found = entries.filter(([value]) => {
       const words = normalizeText(displayFacetValue(value, definition)).split(" ");
       return tokens.every((token) => words.some((word) => word.startsWith(token)));
     });
-    found.slice(0, FACET_SEARCH_LIMIT).forEach(([value, count], index) =>
-      matches.append(facetOption(definition, value, count, `match-${index}`)),
-    );
-    if (!found.length && !groupHits.length) matches.append(element("p", "facet-finder-note", "No matching values."));
-    else if (found.length > FACET_SEARCH_LIMIT) {
+    // Subtype groups and exact values in one list, most models first; on a tie
+    // the group comes first because it is the broader choice.
+    const ranked = [
+      ...groupMatches(tokens, groups, entries).map(([id, count]) => ({ group: true, value: id, count })),
+      ...found.map(([value, count]) => ({ group: false, value, count })),
+    ].sort((left, right) => right.count - left.count || Number(right.group) - Number(left.group));
+    ranked.slice(0, FACET_SEARCH_LIMIT).forEach((item, index) =>
       matches.append(
-        element("p", "facet-finder-note", `${formatNumber(found.length - FACET_SEARCH_LIMIT)} more; keep typing to narrow.`),
+        item.group
+          ? facetOption(groups.definition, item.value, item.count, `group-${index}`, groupText(item.value))
+          : facetOption(definition, item.value, item.count, `match-${index}`),
+      ),
+    );
+    if (!ranked.length) matches.append(element("p", "facet-finder-note", "No matching values."));
+    else if (ranked.length > FACET_SEARCH_LIMIT) {
+      matches.append(
+        element("p", "facet-finder-note", `${formatNumber(ranked.length - FACET_SEARCH_LIMIT)} more; keep typing to narrow.`),
       );
     }
   };
@@ -333,10 +339,13 @@ function renderFacets() {
     if (chosen.size) summary.append(element("span", "facet-selected", chosen.size));
     group.append(summary);
 
-    const searchable = entries.length > FACET_SEARCH_THRESHOLD;
+    const searchable = definition.finderOnly || entries.length > FACET_SEARCH_THRESHOLD;
     const expanded = !searchable && expandedFacets.has(definition.field);
     // Always show selected values, then the most common ones.
-    const visible = expanded
+    // A finder-only facet lists just its selected values; everything else is typed for.
+    const visible = definition.finderOnly
+      ? entries.filter(([value]) => chosen.has(value))
+      : expanded
       ? entries
       : [
           ...entries.filter(([value]) => chosen.has(value)),

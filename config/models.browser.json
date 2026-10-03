@@ -20,26 +20,6 @@
   ],
   "facets": [
     {
-      "field": "species_label",
-      "label": "Species",
-      "type": "string",
-      "sortBy": "count",
-      "missingLabel": "Not reported / not normalized"
-    },
-    {
-      "field": "species_basis_label",
-      "label": "Species basis",
-      "type": "string",
-      "sortBy": "count"
-    },
-    {
-      "field": "model_category_label",
-      "label": "Model category",
-      "type": "string",
-      "sortBy": "count",
-      "missingLabel": "Not reported / not normalized"
-    },
-    {
       "field": "disease_area_labels",
       "label": "Disease area",
       "type": "array",
@@ -54,7 +34,22 @@
       "sortBy": "alphabetical",
       "operator": "or",
       "missingLabel": "Not reported",
-      "groupField": "disease_group_ids"
+      "groupField": "disease_group_ids",
+      "finderOnly": true
+    },
+    {
+      "field": "species_label",
+      "label": "Species",
+      "type": "string",
+      "sortBy": "count",
+      "missingLabel": "Not reported / not normalized"
+    },
+    {
+      "field": "model_category_label",
+      "label": "Model category",
+      "type": "string",
+      "sortBy": "count",
+      "missingLabel": "Not reported / not normalized"
     },
     {
       "field": "counterpart_status",
@@ -101,6 +96,12 @@
       "sortBy": "count",
       "operator": "or",
       "missingLabel": "No genes"
+    },
+    {
+      "field": "species_basis_label",
+      "label": "Species basis",
+      "type": "string",
+      "sortBy": "count"
     },
     {
       "field": "mechanism_status",
